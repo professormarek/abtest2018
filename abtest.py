@@ -4,6 +4,35 @@ from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 import cgi
 import random
 
+html = """
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>My Test Site</title>
+    </head>
+    <body>
+        Click to save the kittens...
+        <form action="/" method="post" >
+            <button type='submit' name = 'my_button' value= 'This is a value I chose for this button' >
+                OK
+            </button>
+        </form>
+    </body>
+</html>"""
+
+thanks = """
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>My Test Site</title>
+    </head>
+    <body>
+        Thanks for your bitcoins mwa ha ha
+    </body>
+</html>"""
+
+
+
 print "running AB test server"
 
 #we're going to reuse the built in python
@@ -37,12 +66,31 @@ class myABhandler(BaseHTTPRequestHandler):
 
 		#wfile is the part of the handler that refers
 		#to data going out (written) to the browser
-		self.wfile.write('Hello world')
+		self.wfile.write(html)
 		return
 
 	#create a handler for POST requests
 	def do_POST(self):
 		print "do_POST was called"
+		#interpret the data coming from the web browser
+		#represent the HTML form that was submitted
+		form = cgi.FieldStorage(fp=self.rfile,
+			headers=self.headers, 
+			environ={'REQUEST_METHOD':'POST', 
+			'CONTENT_TYPE':self.headers['Content-Type']
+			}
+		)
+		#iterate through the data returned by the post reply
+		#returned in the form of a dictionary (dict)
+		for field in form.keys():
+			field_item = form[field]
+			print "DEBUG: ", field_item
+			
+
+		self.send_response(200) #OK / success
+		self.send_header('Content-type', 'text/html')
+		self.end_headers() #these three lines form the 
+		self.wfile.write(thanks)
 
 
 #down here, we atually invoke and use the 
