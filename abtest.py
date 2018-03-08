@@ -46,6 +46,8 @@ thanks = """
     </head>
     <body>
         Thanks for your bitcoins mwa ha ha
+        <p>
+        <a href="/"> go back </a>
     </body>
 </html>"""
 
@@ -76,12 +78,18 @@ class myABhandler(BaseHTTPRequestHandler):
 	#create a handler for GET requests
 	#we override the existing do_GET method in BaseHTTPRequestHandler
 	def do_GET(self):
-		print "do_GET was called"
+		print "do_GET was called: ", self.path
 		#beginning of a "correct" http response
 		#compose a proper HTTP response using the framework
 		self.send_response(200) #OK / success
 		self.send_header('Content-type', 'text/html')
 		self.end_headers() #these three lines form the 
+
+		#adding code to check if the browser is trying to download an icon. Basically stop if the browser
+		#is requesting anything besides the default "/" or a .html file
+		#this avoids counting spurious icon requests!
+		if(self.path != "/" and not self.path.endswith(".html")):
+			return #end early!
 
 		#show version "a" with freqency - probability_of_a 
 		if random.random() < probability_of_a:
