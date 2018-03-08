@@ -26,8 +26,19 @@ print "running AB test server"
 #we inherit or reuse the BaseHTTPRequestHandler class
 class myABhandler(BaseHTTPRequestHandler):
 	#create a handler for GET requests
+	#we override the existing do_GET method in BaseHTTPRequestHandler
 	def do_GET(self):
 		print "do_GET was called"
+		#beginning of a "correct" http response
+		#compose a proper HTTP response using the framework
+		self.send_response(200) #OK / success
+		self.send_header('Content-type', 'text/html')
+		self.end_headers() #these three lines form the 
+
+		#wfile is the part of the handler that refers
+		#to data going out (written) to the browser
+		self.wfile.write('Hello world')
+		return
 
 	#create a handler for POST requests
 	def do_POST(self):
