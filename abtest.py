@@ -4,7 +4,9 @@ from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 import cgi
 import random
 
-html = """
+probability_of_a = 0.80
+
+htmla = """
 <!DOCTYPE html>
 <html>
     <head>
@@ -13,7 +15,23 @@ html = """
     <body>
         Click to save the kittens...
         <form action="/" method="post" >
-            <button type='submit' name = 'my_button' value= 'This is a value I chose for this button' >
+            <button type='submit' name = 'my_button' value= 'Version_A_Clicked' >
+                OK
+            </button>
+        </form>
+    </body>
+</html>"""
+
+htmlb = """
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>My Test Site</title>
+    </head>
+    <body>
+        Click to save the puppies...
+        <form action="/" method="post" >
+            <button type='submit' name = 'my_button' value= 'Version_B_Clicked' >
                 OK
             </button>
         </form>
@@ -31,7 +49,8 @@ thanks = """
     </body>
 </html>"""
 
-
+#use a file to store the log
+logfile = open('abtest.log', 'w')
 
 print "running AB test server"
 
@@ -64,9 +83,21 @@ class myABhandler(BaseHTTPRequestHandler):
 		self.send_header('Content-type', 'text/html')
 		self.end_headers() #these three lines form the 
 
-		#wfile is the part of the handler that refers
-		#to data going out (written) to the browser
-		self.wfile.write(html)
+		#show version "a" with freqency - probability_of_a 
+		if random.random() < probability_of_a:
+			#show version A
+			#wfile is the part of the handler that refers
+			#to data going out (written) to the browser
+			print "serving version A"
+			logfile.write("serving version A\n")
+			self.wfile.write(htmla)
+		else:
+			#show version B
+			print "serving version B"
+			logfile.write("serving version B\n")
+			self.wfile.write(htmlb)
+
+		
 		return
 
 	#create a handler for POST requests
@@ -84,13 +115,24 @@ class myABhandler(BaseHTTPRequestHandler):
 		#returned in the form of a dictionary (dict)
 		for field in form.keys():
 			field_item = form[field]
-			print "DEBUG: ", field_item
-			
+			#print "DEBUG: ", field_item
+			if(field_item.name == "my_button"):
+				if(field_item.value == "Version_A_Clicked"):
+					print "version A was clicked"
+					logfile.write("version A was clicked\n")
+
+				else:
+					print "version B was clicked"
+					logfile.write("version B was clicked\n")
+
+
 
 		self.send_response(200) #OK / success
 		self.send_header('Content-type', 'text/html')
 		self.end_headers() #these three lines form the 
 		self.wfile.write(thanks)
+
+		return
 
 
 #down here, we atually invoke and use the 
@@ -113,8 +155,8 @@ except KeyboardInterrupt:
 	print "user pressed ctrl+c, shutting down web server"
 	server.socket.close() #closes the socket..
 
-
-
+#make sure you close any open files...
+logfile.close()
 print "program completed successfully"
 
 
